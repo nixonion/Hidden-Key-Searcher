@@ -3,6 +3,7 @@
 #include <iostream>
 
 
+
 typedef struct _UNICODE_STRING {
 	USHORT Length;
 	USHORT MaximumLength;
@@ -129,7 +130,7 @@ void main() {
 		
 		printf("\n\n\n");
 
-		Index = 2;
+		Index = 0;
 		while (TRUE)
 		{
 
@@ -153,12 +154,20 @@ void main() {
 				pKeyInfo,
 				ulKeyInfoSize,
 				&size_needed);
-			printf("\n%ls", pKeyInfo->Name );
+			printf("\n-----------------\n");
+			printf("\nname = %ls", pKeyInfo->Name +2 );
 
 			ULONG_PTR   pSrc = NULL;
 			pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
-			printf("\n%ls", pSrc);
-			break;
+			printf("\nsource = %ls", pSrc);
+			printf("\n-----------------\n");
+			if (status == 0x8000001A || status== 0xC000000D)
+			{
+				break;
+			}
+			Index++;
+
+			
 		}
 
 
