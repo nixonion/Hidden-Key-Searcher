@@ -56,6 +56,19 @@ NTSTATUS(NTAPI *_NtQueryValueKey)(
 
 _NtQueryValueKey NtQueryValueKey = NULL;
 
+typedef
+NTSTATUS(NTAPI *_NtEnumerateValueKey)(
+	IN HANDLE KeyHandle,
+	IN ULONG                       Index,
+	IN KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+	IN PVOID KeyValueInformation,
+	IN ULONG Length,
+	IN PULONG ResultLength
+	);
+
+_NtEnumerateValueKey NtEnumerateValueKey = NULL;
+
+
 //typedef NTSTATUS(*_NtQueryValueKey)(HANDLE, PUNICODE_STRING, KEY_VALUE_INFORMATION_CLASS, PVOID, ULONG, PULONG);
 
 #define HIDDEN_KEY_LENGTH 11
@@ -63,6 +76,9 @@ _NtQueryValueKey NtQueryValueKey = NULL;
 void main() {
 
 	HMODULE hNtdll1 = LoadLibraryA("ntdll.dll");
+	NtEnumerateValueKey = (_NtEnumerateValueKey)GetProcAddress(hNtdll1, "NtEnumerateValueKey");
+
+	hNtdll1 = LoadLibraryA("ntdll.dll");
 	NtQueryValueKey = (_NtQueryValueKey)GetProcAddress(hNtdll1, "NtQueryValueKey");
 
 	UNICODE_STRING ValueName = { 0 };
@@ -111,8 +127,39 @@ void main() {
 		pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
 		printf("\n%ls", pSrc);
 		
-		
+		printf("\n\n\n");
 
+		Index = 2;
+		while (TRUE)
+		{
+
+			status = NtEnumerateValueKey(hkResult,
+				Index,
+				KeyValueFullInformation,
+				nullptr,
+				0,
+				&size_needed);
+
+			ulKeyInfoSize = size_needed;
+			pKeyInfo = (PKEY_VALUE_FULL_INFORMATION)alloca(size_needed);//ExAllocatePoolWithTag(NonPagedPool, ulKeyInfoSizeNeeded, g_ulTag);
+			if (NULL == pKeyInfo)
+			{
+				return;
+			}
+			RtlZeroMemory(pKeyInfo, ulKeyInfoSize);
+			status = NtEnumerateValueKey(hkResult,
+				Index,
+				KeyValueFullInformation,
+				pKeyInfo,
+				ulKeyInfoSize,
+				&size_needed);
+			printf("\n%ls", pKeyInfo->Name );
+
+			ULONG_PTR   pSrc = NULL;
+			pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
+			printf("\n%ls", pSrc);
+			break;
+		}
 
 
 		
@@ -121,21 +168,13 @@ void main() {
 		{
 			printf("lol");
 		}
-		//RegQueryValueExA(hkResult, NULL, NULL, NULL, NULL, buflen);
-		//printf("%d", *buflen);
-		//*buf = (BYTE*)malloc(*buflen);
-		//RegQueryValueExA(hkResult, NULL, NULL, NULL, *buf, buflen);
+		
 		/* 
 		if (!NtDeleteValueKey(hkResult, &ValueName)) {
 			printf("SUCCESS deleting hidden run value in registry!\n");
 		}
 		*/
-		//RegCloseKey(hkResult);
+		RegCloseKey(hkResult);
 	}
 
-	Index = 0;
-	while (TRUE)
-	{
-
-	}
 }
