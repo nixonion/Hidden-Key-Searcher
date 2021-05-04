@@ -92,9 +92,11 @@ void main() {
 	}
 
 	ValueName.Buffer = runkeyPath_trick;
-	printf("%ls\n", ValueName.Buffer+2);
+	printf("%.9ls\n", ValueName.Buffer+2);
 	ValueName.Length = 2 * HIDDEN_KEY_LENGTH; //this value doesn't matter as long as it is non-zero
+	printf("%d\n", ValueName.Length);
 	ValueName.MaximumLength = 0;
+	printf("%d\n\n", ValueName.MaximumLength);
 
 	BYTE** buf=NULL; DWORD* buflen=NULL;
 	
@@ -105,9 +107,10 @@ void main() {
 	HKEY hkResult = NULL;
 	ULONG Index = 0;
 	NTSTATUS status;
+	int i;
 	
 	if (!RegOpenKeyExW(HKEY_CURRENT_USER, runkeyPath, NULL, KEY_ALL_ACCESS, &hkResult)) {
-		printf("%p", hkResult);
+		//printf("%p", hkResult);
 		
 		status = NtQueryValueKey(hkResult,&ValueName, KeyValueFullInformation,nullptr,0,&size_needed);
 		
@@ -119,10 +122,10 @@ void main() {
 			return;
 		}
 		RtlZeroMemory(pKeyInfo, ulKeyInfoSize);
-		printf("\n%d", ulKeyInfoSize);
+		//printf("\n%d", ulKeyInfoSize);
 		status = NtQueryValueKey(hkResult, &ValueName, KeyValueFullInformation, pKeyInfo, ulKeyInfoSize, &size_needed);
 
-		printf("\n%ls", pKeyInfo->Name+13);
+		printf("\nname = %ls", pKeyInfo->Name+2);
 
 		ULONG_PTR   pSrc = NULL;
 		pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
@@ -130,7 +133,7 @@ void main() {
 		
 		printf("\n\n\n");
 
-		Index = 0;
+		Index = 3;
 		while (TRUE)
 		{
 
@@ -154,21 +157,69 @@ void main() {
 				pKeyInfo,
 				ulKeyInfoSize,
 				&size_needed);
-			printf("\n-----------------\n");
-			printf("\nname = %ls", pKeyInfo->Name +2 );
 
-			ULONG_PTR   pSrc = NULL;
-			pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
-			printf("\nsource = %ls", pSrc);
-			printf("\n-----------------\n");
+			
+			if (wcscmp(pKeyInfo->Name, L"\0") == 0 && wcscmp(pKeyInfo->Name +1, L"\0") == 0)
+			{
+				printf("\n%d-----------------\n\nname = ",Index);
+				for (i = 0; i < pKeyInfo->NameLength/2; i++)
+				{
+					if (wcscmp(pKeyInfo->Name + i, L"\0") == 0)
+					{
+						printf("_");
+					}
+					printf("%s", pKeyInfo->Name + i);
+				}
+				//printf("\nname = %ls", pKeyInfo->Name +2 );
+				printf("\nindex = %lu", pKeyInfo->TitleIndex);
+				printf("\ntype = %d", pKeyInfo->Type); //0x00000001 REG_SZ
+				printf("\ndatalength = %d", pKeyInfo->DataLength);
+				printf("\nnamelength = %d", pKeyInfo->NameLength);
+				ULONG_PTR   pSrc = NULL;
+				pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
+				printf("\nsource = %ls", pSrc);
+				printf("\n-----------------\n");
+			}
 			if (status == 0x8000001A || status== 0xC000000D)
 			{
 				break;
 			}
+
+			printf("\nyolololo\n");
+
+			ValueName = { 0 };
+			ValueName.Buffer = pKeyInfo->Name;
+			printf("%ls\n", ValueName.Buffer+2);
+			ValueName.Length = pKeyInfo->NameLength; //this value doesn't matter as long as it is non-zero
+			printf("%d\n", ValueName.Length);
+			ValueName.MaximumLength = 0;
+			printf("%d\n\n", ValueName.MaximumLength);
+			break;
 			Index++;
 
 			
 		}
+
+
+		printf("new phase ---\n");
+		status = NtQueryValueKey(hkResult, &ValueName, KeyValueFullInformation, nullptr, 0, &size_needed);
+
+		//std::vector<BYTE> buffer(size_needed);
+		ulKeyInfoSize = size_needed;
+		pKeyInfo = (PKEY_VALUE_FULL_INFORMATION)alloca(size_needed);//ExAllocatePoolWithTag(NonPagedPool, ulKeyInfoSizeNeeded, g_ulTag);
+		if (NULL == pKeyInfo)
+		{
+			return;
+		}
+		RtlZeroMemory(pKeyInfo, ulKeyInfoSize);
+		//printf("\n%d", ulKeyInfoSize);
+		status = NtQueryValueKey(hkResult, &ValueName, KeyValueFullInformation, pKeyInfo, ulKeyInfoSize, &size_needed);
+
+		printf("\nname = %ls", pKeyInfo->Name + 2);
+
+		ULONG_PTR   pSrc1 = NULL;
+		pSrc1 = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
+		printf("\n%ls", pSrc1);
 
 
 		
