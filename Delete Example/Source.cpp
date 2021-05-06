@@ -129,7 +129,10 @@ void main() {
 
 			ulKeyInfoSize = size_needed;
 			
-
+			if (status == 0x8000001A || status == 0xC000000D)
+			{
+				break;
+			}
 			pKeyInfo = (PKEY_VALUE_FULL_INFORMATION)alloca(size_needed);
 			if (NULL == pKeyInfo)
 			{
@@ -143,10 +146,7 @@ void main() {
 				ulKeyInfoSize,
 				&size_needed);
 
-			if (status == 0x8000001A || status == 0xC000000D)
-			{
-				break;
-			}
+			
 
 			
 			if (wcscmp(pKeyInfo->Name, L"\0") == 0 && wcscmp(pKeyInfo->Name +1, L"\0") == 0)
@@ -171,7 +171,7 @@ void main() {
 				ULONG_PTR   pSrc = NULL;
 				pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
 				printf("\nSource\t= %ls", pSrc);
-				printf("\nHandle\t= %p", hkResult);
+				
 				
 				
 
@@ -192,9 +192,8 @@ void main() {
 		
 
 		
-		RegCloseKey(hkResult);
 	}
-/*
+
 	
 	
 	if (!RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", NULL, KEY_ALL_ACCESS, &hkResult))
@@ -273,7 +272,6 @@ void main() {
 
 
 
-		RegCloseKey(hkResult);
 	}
 
 	if (!RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", NULL, KEY_ALL_ACCESS, &hkResult))
@@ -353,47 +351,22 @@ void main() {
 
 
 
-		RegCloseKey(hkResult);
+		
 	}
-	*/
-
+	
+	
 	printf("\n---------------------------------------------------------------------------\n");
 	
-	printf("\n\n%d", IndexOfNullKey);
-	printf("\n%ls", ValueNameArray[2].Buffer + 2);
-	printf("\n%p", IndexHkey[2]);
+	
+	
 
-	if (!RegOpenKeyExW(HKEY_CURRENT_USER, runkeyPath, NULL, KEY_ALL_ACCESS, &hkResult)) {
-		//printf("%p", hkResult);
-
-		status = NtQueryValueKey(IndexHkey[2], &ValueNameArray[2], KeyValueFullInformation, nullptr, 0, &size_needed);
-
-		
-		ulKeyInfoSize = size_needed;
-		pKeyInfo = (PKEY_VALUE_FULL_INFORMATION)alloca(size_needed);//ExAllocatePoolWithTag(NonPagedPool, ulKeyInfoSizeNeeded, g_ulTag);
-		if (NULL == pKeyInfo)
-		{
-			return;
-		}
-		RtlZeroMemory(pKeyInfo, ulKeyInfoSize);
-		//printf("\n%d", ulKeyInfoSize);
-		status = NtQueryValueKey(IndexHkey[2], &ValueNameArray[2], KeyValueFullInformation, pKeyInfo, ulKeyInfoSize, &size_needed);
-
-		printf("\nname = %ls", pKeyInfo->Name + 2);
-
-		ULONG_PTR   pSrc = NULL;
-		pSrc = (ULONG_PTR)((PBYTE)pKeyInfo + pKeyInfo->DataOffset);
-		printf("\n%ls", pSrc);
-
-		printf("\n\n\n");
-	}
 	
 	
 		int inp;
 		int consent;
 		if (IndexOfNullKey != 0)
 		{
-			cout << "Enter 1 to delete entry, Enter 0 to exit : ";
+			cout << "\n\n\nEnter 1 to delete entry, Enter 0 to exit : ";
 			cin >> inp;
 			if (inp == 1)
 			{
@@ -408,8 +381,8 @@ void main() {
 				status = NtQueryValueKey(IndexHkey[inp], &ValueNameArray[inp], KeyValueFullInformation, nullptr, 0, &size_needed);
 
 				printf("\nDeleting Entry.......\n");
-				printf("\n%ls", ValueNameArray[inp].Buffer + 2);
-				printf("\n%p", IndexHkey[inp]);
+				
+
 				ulKeyInfoSize = size_needed;
 				pKeyInfo = (PKEY_VALUE_FULL_INFORMATION)alloca(size_needed);
 				if (NULL == pKeyInfo)
@@ -440,13 +413,16 @@ void main() {
 
 
 			}
-			//printf("%d", inp);
+			
 
 		}
 		
 
 
-		
+		for (i = 0; i < IndexOfNullKey; i++)
+		{
+
+		}
 	
 	
 	/* Uncomment this code to check the number of keys read by Non-Ntdll functions
