@@ -113,6 +113,7 @@ void main() {
 	NTSTATUS status;
 	int i=0;
 	
+	printf("Searching for NULL Hidden Keys");
 	if (!RegOpenKeyExW(HKEY_CURRENT_USER, runkeyPath, NULL, KEY_ALL_ACCESS, &hkResult)) 
 	{
 		
@@ -153,7 +154,7 @@ void main() {
 			{
 				printf("\n\n-----------------\n\n");
 				printf("\nEntry Number : %d\n\n", IndexOfNullKey);
-				printf("Registry Path\t= HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\n");
+				printf("Registry Path\t= HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\n");
 				printf("Name\t= ");
 				for (i = 0; i < pKeyInfo->NameLength/2; i++)
 				{
@@ -163,7 +164,7 @@ void main() {
 					}
 					printf("%s", pKeyInfo->Name + i);
 				}
-				//printf("\nname = %ls", pKeyInfo->Name +2 );
+				
 				printf("\nIndex\t= %lu", pKeyInfo->TitleIndex);
 				printf("\nType\t= %d", pKeyInfo->Type); //0x00000001 REG_SZ
 				printf("\nDatalength\t= %d", pKeyInfo->DataLength);
@@ -236,7 +237,7 @@ void main() {
 			{
 				printf("\n\n-----------------\n\n");
 				printf("\nEntry Number : %d\n\n", IndexOfNullKey);
-				printf("Registry Path\t= HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\n");
+				printf("Registry Path\t= HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n");
 				printf("Name\t= ");
 				for (i = 0; i < pKeyInfo->NameLength / 2; i++)
 				{
@@ -274,6 +275,7 @@ void main() {
 
 	}
 
+	//You can provide your custom path to check for NULL terminated entries by changing the first two values of RegOpenKeyEx function
 	if (!RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", NULL, KEY_ALL_ACCESS, &hkResult))
 	{
 
@@ -314,7 +316,7 @@ void main() {
 			{
 				printf("\n\n-----------------\n\n");
 				printf("\nEntry Number : %d\n\n", IndexOfNullKey);
-				printf("Registry Path\t= HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce\n");
+				printf("Registry Path\t= HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce\n");
 				printf("Name\t= ");
 				for (i = 0; i < pKeyInfo->NameLength / 2; i++)
 				{
